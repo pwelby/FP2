@@ -1,52 +1,55 @@
-# Final Project Assignment 2: Explore One More! (FP2) 
+# Final Project Assignment 2: Explore One More! (FP2)
 DUE March 30, 2015 Monday (2015-03-30)
 
-This is just like FP1, but where you do a different library. (Full description of FP1 is [on Piazza.][piazza])
+### My Library: rsound
 
-During this assignment, you should start looking for teammates. See the project schedule [on Piazza.][schedule]
+In this second exploration, I decided to familiarize myself with the rsound library, which provides a suite of useful abstractions for reading and manipulating sound data.
+I decided to write a small two-part demonstration.
 
-Write your report right in this file. Instructions are below. You can delete them if you like, or just leave them at the bottom.
-You are allowed to change/delete anything in this file to make it into your report. It will be public.
-
-This file is formatted with the [**markdown** language][markdown], so take a glance at how that works.
-
-This file IS your report for the assignment, including code and your story.
-
-Code is super easy in markdown, which you can easily do inline `(require net/url)` or do in whole blocks:
+The full code is as follows:  
 ```
 #lang racket
 
-(require net/url)
+(require rsound)
+
+(define CLIP-PATH "D:/Development/randomrepos/FP2/rsound-pluck-test.wav")
+(define NEWSOUND-PATH "D:/Development/randomrepos/FP2/mysound-test.wav")
+
+(define VOLUME 0.08)
+(define FREQ-LOW 220)
+(define FREQ-HIGH 880)
+(define NUM-FRAMES 176400)
+
+
+(define num-samples (rs-read-frames CLIP-PATH))
+(define srate (rs-read-sample-rate CLIP-PATH))
+(define duration (/ num-samples srate))
+
+(define (sine-sweep f)
+  (* VOLUME
+     (sin (* 2 pi
+             (+ FREQ-LOW (* (/ f (- 1 NUM-FRAMES))
+                            (- FREQ-LOW FREQ-HIGH)))
+             (/ f FRAME-RATE)))))
+
+(define mysound (build-sound NUM-FRAMES sine-sweep))
+
+(rs-write mysound NEWSOUND-PATH)
 ```
 
-### My Library: (library name here)
-Write what you did!
-Remember that this report must include:
- 
-* a narrative of what you did
-* the code that you wrote
-* output from your code demonstrating what it produced
-* any diagrams or figures explaining your work 
- 
-The narrative itself should be no longer than 350 words. Yes, you can add more files and link or refer to them. This is github, handling files is awesome and easy!
+The first part works a bit with the file reading procedures given in the rsound library. The `rs-read-frames` and `rs-read-sample-rate` procedures both read data from the header of a WAV file. Using the two in conjunction, the duration of the sound file in seconds can be determined. After defining the bindings above, we can query the interpreter for the value of duration with the following result:
+```
+> duration
+2 1/2
+```
+This is indeed the duration of the [test sound file][Duration-Test-Sound] I had made.
 
-Ask questions publicly in the Piazza group.
+The second part of the demo builds a simple sound using the `build-sound` procedure and my own `sine-sweep` procedure to generate values for each sample. As my sample generator's name suggests, the generated sound is a simple sine wave which sweeps linearly from the frequency `FREQ-LOW` to `FREQ-HIGH` over a duration of `NUM-FRAMES` samples.
+*Note: The FRAME-RATE constant is provided by rsound, and has a value of 44100, a typical default number of samples per second.*
 
-### How to Do and Submit this assignment
+Once the sound has been built, it is written to a file at `NEWSOUND-PATH`.
 
-1. To start, [**fork** this repository][forking].
-1. Modify the README.md file and [**commit**][ref-commit] changes to complete your solution.
-  2. (This assignment is just one README.md file, so you can edit it right in github without cloning)
-  3. (You may need to clone and push if you want to add extra files)
-1. [Create a **pull request**][pull-request] on the original repository to turn in the assignment.
+The resulting WAV file is available [here][Sound-File-Output].
 
-<!-- Links -->
-[piazza]: https://piazza.com/class/i55is8xqqwhmr?cid=411
-[schedule]: https://piazza.com/class/i55is8xqqwhmr?cid=453
-[markdown]: https://help.github.com/articles/markdown-basics/
-[forking]: https://guides.github.com/activities/forking/
-[ref-clone]: http://gitref.org/creating/#clone
-[ref-commit]: http://gitref.org/basic/#commit
-[ref-push]: http://gitref.org/remotes/#push
-[pull-request]: https://help.github.com/articles/creating-a-pull-request
-
+[Duration-Test-Sound]: https://soundcloud.com/pwelby/rsound-pluck-test
+[Sound-File-Output]: https://soundcloud.com/pwelby/mysound-test
